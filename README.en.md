@@ -2,6 +2,8 @@
 
 [简体中文](README.md) | English
 
+> **Fork notice**: this repository forks [sdli1995/dlssg_for_sm86](https://github.com/sdli1995/dlssg_for_sm86) and adds a `d3d12.dll` proxy entry under `altnative` on top of upstream 0.2.4. Everything else matches upstream.
+
 Windows x64 / D3D12. Install `version.dll` and `dlssg_sm86.ini` beside the actual game rendering executable after exiting the game and preserving the previous files.
 
 The DLL contains the native C++ wrapper, SM75/SM86 PTX/Cubin, model and inference graph. It does not extract, load or memory-map the original frame-generation DLL. Installed NVIDIA NGX/NVAPI/CUDA driver interfaces are still required; CUDA Toolkit is unnecessary.
@@ -42,11 +44,11 @@ Requirements: Windows x64, a D3D12 game and NVIDIA drivers. Python and CUDA Tool
 
 1. Exit the game. For an upgrade, back up this project's previous proxy DLL and INI to a separate directory and remove its old proxy from the game directory. Preserve other mods' files.
 2. Find the actual rendering EXE. For Black Myth: Wukong, this is `D:\SteamLibrary\steamapps\common\BlackMythWukong\b1\Binaries\Win64`, containing `b1-Win64-Shipping.exe`.
-3. Copy **one proxy DLL and `dlssg_sm86.ini`** beside that EXE. The default is the root `version.dll`. Alternatives are `altnative/winmm.dll`, `dinput8.dll`, `winhttp.dll` and `dxgi.dll`: select a name the game loads, preserve its filename, and keep only one proxy from this package installed.
+3. Copy **one proxy DLL and `dlssg_sm86.ini`** beside that EXE. The default is the root `version.dll`. Alternatives are `altnative/winmm.dll`, `dinput8.dll`, `winhttp.dll`, `dxgi.dll` and `d3d12.dll`: select a name the game loads, preserve its filename, and keep only one proxy from this package installed.
 4. A 3080 Ti uses `Router=SM86, KernelImage=PTX`; Turing/SM75 uses `Router=SM75, KernelImage=PTX`. The INI is shared by all entry points.
 5. Restart, enable DLSS frame generation and select the multiplier in the game. `MaxGeneratedFrames=3` permits up to three generated frames, or 4X total; the game selects the actual count.
 
-Every proxy contains the complete native runtime. Preserve conflicting DLLs owned by other mods and select a different available entry point. Do not mix this package with upstream SM75 proxy/injector/backend files.
+Every proxy contains the complete native runtime. Preserve conflicting DLLs owned by other mods and select a different available entry point. The `d3d12.dll` entry suits games that load `d3d12.dll` from the game directory; its 18 D3D12 exports forward to the system `d3d12.dll`, leaving the game's D3D12 functionality unaffected. Do not mix this package with upstream SM75 proxy/injector/backend files.
 
 Default exact sampling is `HardwareBilinear=0`; optional approximate sampling is `1`, applies only to SM86, and may change generated pixels. Restart after editing the INI. See [configuration](docs/NATIVE_INI.md).
 
@@ -56,7 +58,7 @@ For loading diagnostics, temporarily set `Logging.Level=2` and inspect `dlssg_sm
 
 This mod uses a system DLL proxy and LoadLibrary hooks to integrate with the game. Such behavior may trigger heuristic false positives. Native integration removes extraction and manual mapping of the original feature DLL, while the integration hooks remain necessary. The relevant security vendor must review the specific detection to determine whether it is a false positive.
 
-All five DLLs are signed with the **DLSSG Native Project self-signed certificate**, visible under Digital Signatures in Windows file properties. The signature verifies signer identity and file integrity; **it does not establish default Windows trust or guarantee the absence of antivirus alerts**. An untrusted certificate chain, a SmartScreen reputation warning and a malware detection are separate checks. Self-signed files can still receive SmartScreen warnings. [Microsoft SmartScreen guidance](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation)
+The upstream five DLLs are signed with the **DLSSG Native Project self-signed certificate**; the fork's `altnative/d3d12.dll` uses a separate self-signed certificate (`CN=DLSSG-Native D12 Mod`, no timestamp). Both are visible under Digital Signatures in Windows file properties. The signature verifies signer identity and file integrity; **it does not establish default Windows trust or guarantee the absence of antivirus alerts**. An untrusted certificate chain, a SmartScreen reputation warning and a malware detection are separate checks. Self-signed files can still receive SmartScreen warnings. [Microsoft SmartScreen guidance](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation)
 
 If a detection occurs, first check the download source and the release ZIP against its `.sha256` sidecar. Record the security product, detection name, definition version and detected DLL's SHA256, then request a false-positive review from that vendor. For Microsoft Defender, use [Microsoft file analysis](https://www.microsoft.com/en-us/wdsi/filesubmission). Matching hashes and signatures do not replace the vendor's detection assessment.
 

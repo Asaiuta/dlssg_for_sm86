@@ -2,6 +2,8 @@
 
 简体中文 | [English](README.en.md)
 
+> **Fork 说明**：本仓库 fork 自 [sdli1995/dlssg_for_sm86](https://github.com/sdli1995/dlssg_for_sm86)，在上游 0.2.4 基础上于 `altnative` 新增 `d3d12.dll` 代理入口，其余内容与上游保持一致。
+
 Windows x64 / D3D12。运行文件为 `version.dll` 和 `dlssg_sm86.ini`。
 
 自有 C++ 包装层、SM75/SM86 PTX/Cubin、310.1 模型和推理图都在一个 DLL 内。运行时不解压、加载或内存映射原厂 `nvngx_dlssg.dll`；仍使用系统 NVIDIA NGX/NVAPI/CUDA 驱动接口，无需 CUDA Toolkit。
@@ -53,6 +55,7 @@ Windows x64 / D3D12。运行文件为 `version.dll` 和 `dlssg_sm86.ini`。
 | 替代 | `altnative/dinput8.dll` | 同上 |
 | 替代 | `altnative/winhttp.dll` | 同上 |
 | 替代 | `altnative/dxgi.dll` | 同上；当前仍为 D3D12 管线 |
+| 替代 | `altnative/d3d12.dll` | 同上；适用于会加载游戏目录 `d3d12.dll` 的游戏，18 个 D3D12 导出转发给系统 `d3d12.dll`，游戏 D3D12 功能不受影响 |
 
 所有 DLL 都包含完整推理资源。替代入口复制时保持原文件名；其他文件可保留在下载目录。不额外混用上游 SM75 包中的代理、注入器或后端。
 
@@ -64,7 +67,7 @@ Windows x64 / D3D12。运行文件为 `version.dll` 和 `dlssg_sm86.ini`。
 
 本项目通过系统 DLL 代理和 LoadLibrary hook 接入游戏，这类行为可能被安全软件的启发式检测误报。Native 化已经取消原厂 feature DLL 的解压和手动映射，但仍需保留接入 hook；是否属于误报，要结合具体检测结果由对应厂商复核。
 
-全部五个 DLL 都使用 **DLSSG Native Project 项目自签证书**，可在 Windows 文件属性的“数字签名”中查看。签名用于核验签名者和文件完整性，**不提供 Windows 默认信任，也不保证消除杀软告警**。证书链不受信任、SmartScreen 的信誉提示与杀软检出属于不同检查；自签文件仍可能收到 SmartScreen 提示。[Microsoft SmartScreen 说明](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation)
+上游的五个 DLL 使用 **DLSSG Native Project 项目自签证书**；本 fork 新增的 `altnative/d3d12.dll` 使用另一枚自签证书（`CN=DLSSG-Native D12 Mod`，未加时间戳）。两者都可在 Windows 文件属性的“数字签名”中查看。签名用于核验签名者和文件完整性，**不提供 Windows 默认信任，也不保证消除杀软告警**。证书链不受信任、SmartScreen 的信誉提示与杀软检出属于不同检查；自签文件仍可能收到 SmartScreen 提示。[Microsoft SmartScreen 说明](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation)
 
 遇到告警时，先核对下载来源及发布 ZIP 旁的 `.sha256`，再记录安全软件名称、检测名称、病毒库版本和被检测 DLL 的 SHA256，向对应厂商提交误报复核。Microsoft Defender 的提交入口为 [Microsoft 文件分析](https://www.microsoft.com/en-us/wdsi/filesubmission)；核对哈希和签名不能代替厂商的检测结论。
 
